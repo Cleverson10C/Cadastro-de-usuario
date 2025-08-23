@@ -1,68 +1,67 @@
 import customtkinter as ctk
+import os
+from janela_login import criar_janela_login
 
-# Configurações iniciais do CustomTkinter
-ctk.set_appearance_mode("dark")
-ctk.set_default_color_theme("dark-blue")
+# Funções para salvar e carregar usuários de um arquivo
+def carregar_usuarios():
+    usuarios = {}
+    if os.path.exists("usuarios.txt"):
+        with open("usuarios.txt", "r", encoding="utf-8") as f:
+            for linha in f:
+                partes = linha.strip().split(",")
+                if len(partes) == 2:
+                    usuarios[partes[0]] = partes[1]
+    else:
+        usuarios["admin@gmail.com"] = "123456"
+    return usuarios
 
-# Criação da janela principal
-janela = ctk.CTk()
-janela.title("Janela de Login")
-janela.geometry("500x400")  # Aumentei um pouco a altura
-janela.resizable(False, False)
+def salvar_usuarios(usuarios):
+    with open("usuarios.txt", "w", encoding="utf-8") as f:
+        for usuario, senha in usuarios.items():
+            f.write(f"{usuario},{senha}\n")
 
-def validar_login():
-    usuario = email.get().strip()  # Remove espaços em branco
+usuarios = carregar_usuarios()
+
+def validar_login(email, senha, resultado):
+    usuario = email.get().strip()
     senha_usuario = senha.get().strip()
-    
-    # Verificar se os campos não estão vazios
     if not usuario or not senha_usuario:
         resultado.configure(text="Preencha todos os campos!", text_color="red")
         return
-    
-    if usuario == "admin@gmail.com" and senha_usuario == "123456":
+    if usuario in usuarios and usuarios[usuario] == senha_usuario:
         resultado.configure(text="Login realizado com sucesso!", text_color="green")
-        # Aqui você pode adicionar código para abrir uma nova janela
     else:
         resultado.configure(text="E-mail ou senha incorreta.", text_color="red")
 
-def limpar_campos():
+def cadastrar_usuario(email, senha, resultado, limpar_campos):
+    usuario = email.get().strip()
+    senha_usuario = senha.get().strip()
+    if not usuario or not senha_usuario:
+        resultado.configure(text="Preencha todos os campos para cadastrar!", text_color="red")
+        return
+    if usuario in usuarios:
+        resultado.configure(text="Usuário já cadastrado!", text_color="orange")
+    else:
+        usuarios[usuario] = senha_usuario
+        salvar_usuarios(usuarios)
+        resultado.configure(text="Usuário cadastrado com sucesso!", text_color="green")
+        limpar_campos()
+
+def limpar_campos(email, senha, resultado):
     email.delete(0, 'end')
     senha.delete(0, 'end')
     resultado.configure(text="")
 
-# Criação dos campos de entrada e botões
-titulo = ctk.CTkLabel(janela, text="Sistema de Login", font=("Arial", 20, "bold"))
-titulo.pack(pady=20)
+def iniciar_interface():
+    import customtkinter as ctk
+    janela = ctk.CTk()
+    email = ctk.CTkEntry(janela, placeholder_text="Digite seu email", justify="center", width=300)
+    senha = ctk.CTkEntry(janela, placeholder_text="Digite sua senha", show="*", justify="center", width=300)
+    resultado = ctk.CTkLabel(janela, text="", font=("Arial", 12))
+    criar_janela_login(
+        validar_login,
+        cadastrar_usuario,
+        limpar_campos
+    )
 
-texto = ctk.CTkLabel(janela, text="E-mail:")
-texto.pack(pady=(10, 5))
-
-email = ctk.CTkEntry(janela, placeholder_text="Digite seu email", justify="center", width=300)
-email.pack(pady=5)
-
-texto_senha = ctk.CTkLabel(janela, text="Senha:")
-texto_senha.pack(pady=(10, 5))
-
-senha = ctk.CTkEntry(janela, placeholder_text="Digite sua senha", show="*", justify="center", width=300)
-senha.pack(pady=5)
-
-checkbox = ctk.CTkCheckBox(janela, text="Lembrar Login")
-checkbox.pack(pady=10)
-
-# Frame para os botões
-frame_botoes = ctk.CTkFrame(janela, fg_color="transparent")
-frame_botoes.pack(pady=10)
-
-botao = ctk.CTkButton(frame_botoes, text="Login", command=validar_login, width=120)
-botao.pack(side="left", padx=5)
-
-botao_limpar = ctk.CTkButton(frame_botoes, text="Limpar", command=limpar_campos, width=120)
-botao_limpar.pack(side="left", padx=5)
-
-resultado = ctk.CTkLabel(janela, text="", font=("Arial", 12))
-resultado.pack(pady=10)
-
-# Permitir login com Enter
-senha.bind("<Return>", lambda event: validar_login())
-
-janela.mainloop()
+iniciar_interface()
