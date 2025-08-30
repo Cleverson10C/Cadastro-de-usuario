@@ -31,8 +31,8 @@ def validar_login(email, senha, resultado):
     if usuario in usuarios and usuarios[usuario] == senha_usuario:
         resultado.configure(text="Login realizado com sucesso!", text_color="green")
     else:
-        resultado.configure(text="E-mail ou senha incorreta.", text_color="red")
-
+        resultado.configure(text="Nome ou senha incorreta.", text_color="red")
+        
 def cadastrar_usuario(email, senha, resultado, limpar_campos):
     usuario = email.get().strip()
     senha_usuario = senha.get().strip()
