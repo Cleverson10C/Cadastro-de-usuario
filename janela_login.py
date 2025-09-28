@@ -40,10 +40,16 @@ def criar_janela_login(validar_login, cadastrar_usuario, limpar_campos):
     )
     botao_login.pack(side="left", padx=10)
 
+    # Função auxiliar para o cadastro
+    def fazer_cadastro():
+        def limpar_apos_cadastro():
+            limpar_campos(nome, senha, resultado)
+        cadastrar_usuario(nome, senha, resultado, limpar_apos_cadastro)
+
     botao_cadastrar = ctk.CTkButton(
         frame_botoes,
         text="Cadastrar",
-        command=lambda: cadastrar_usuario(nome, senha, resultado, lambda: limpar_campos(nome, senha, resultado)),
+        command=fazer_cadastro,
         width=120
     )
     botao_cadastrar.pack(side="left", padx=10)
@@ -65,3 +71,31 @@ def criar_janela_login(validar_login, cadastrar_usuario, limpar_campos):
     janela.mainloop()
 
 
+# Funções de teste para quando o arquivo for executado diretamente
+def validar_login_teste(nome, senha, resultado):
+    nome_valor = nome.get()
+    senha_valor = senha.get()
+    
+    if nome_valor and senha_valor:
+        resultado.configure(text="Login realizado com sucesso!", text_color="green")
+    else:
+        resultado.configure(text="Por favor, preencha todos os campos!", text_color="red")
+
+def cadastrar_usuario_teste(nome, senha, resultado, callback_limpar):
+    nome_valor = nome.get()
+    senha_valor = senha.get()
+    
+    if nome_valor and senha_valor:
+        resultado.configure(text="Usuário cadastrado com sucesso!", text_color="green")
+        callback_limpar()
+    else:
+        resultado.configure(text="Por favor, preencha todos os campos!", text_color="red")
+
+def limpar_campos_teste(nome, senha, resultado):
+    nome.delete(0, 'end')
+    senha.delete(0, 'end')
+    resultado.configure(text="")
+
+# Permite executar o arquivo diretamente para testar a interface
+if __name__ == "__main__":
+    criar_janela_login(validar_login_teste, cadastrar_usuario_teste, limpar_campos_teste)
